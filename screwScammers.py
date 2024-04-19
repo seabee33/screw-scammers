@@ -45,6 +45,8 @@ def screwScammers():
 		response = requests.post(url, data=postData)
 		print("Response: ", response.status_code)
 		print(random_words)
+		if(response.status_code != 200):
+			break
 
 
 threadCount = 32
