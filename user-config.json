@@ -1,6 +1,6 @@
 {
     "url": "http://checkmyledger.com/",
-    "max_failures": 5,
+    "max_failures": -1,
     "failure_response": "Your IP has been restricted because of too many attempts.",
     "thread_count": 32,
     "post_keys": [

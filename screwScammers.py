@@ -97,7 +97,7 @@ def screwScammers() -> None:
 			if response.status_code != 200 or USER_CONFIG['failure_response'] in response.text:
 				failed_requests += 1
 
-				if (fails := fails + 1) >= USER_CONFIG['max_failures']:
+				if USER_CONFIG['max_failures'] != -1 and (fails := fails + 1) >= USER_CONFIG['max_failures']:
 					break
 
 				time.sleep(USER_CONFIG['failure_timeout'])
