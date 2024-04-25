@@ -1,5 +1,6 @@
 # A simple python script to send POST data to a fake 24 word "recovery" site, you may need to change the postData to align with how the site posts it.
 # Response code 200 means it works :)
+# This is an updated version which still achieves the same thing as in the video
 
 import requests, random, concurrent.futures,time
 
