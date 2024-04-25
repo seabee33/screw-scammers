@@ -1,0 +1,16 @@
+{
+    "failure_timeout": 0.1,
+    "proxy_sources": [
+        "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",
+        "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/socks4.txt",
+        "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
+
+        "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks5.txt",
+        "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/socks4.txt",
+        "https://raw.githubusercontent.com/MuRongPIG/Proxy-Master/main/http.txt",
+
+        "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt",
+        "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt",
+        "https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt"
+    ]
+}
