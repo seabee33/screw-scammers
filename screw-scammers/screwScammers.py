@@ -3,35 +3,39 @@
 # This is an updated version which still achieves the same thing as in the video
 
 import requests, random, concurrent.futures, time, json, os
-from colors import Fore, Style
+from colors import Fore
 
-missing_files = [file for file in ['words.txt', 'user-config.json', 'dev-config.json', 'user-agents.txt'] if not os.path.exists(file)]
+
+missing_files = [file for file in ['data/words.txt', 'user-config.json', 'data/dev-config.json', 'data/user-agents.txt'] if not os.path.exists(file)]
 if missing_files:
 	print(f"{Fore.RED}Missing files: {Fore.RESET}{', '.join(missing_files)}")
 	exit()
 
 # load configs and proxies
 with open('user-config.json', 'r') as f:
-	USER_CONFIG = json.load(f)
+	USER_CONFIG: dict = json.load(f)
 
-with open('dev-config.json', 'r') as f:
-	DEV_CONFIG = json.load(f)
+with open('data/dev-config.json', 'r') as f:
+	DEV_CONFIG: dict = json.load(f)
 
-with open('words.txt', 'r') as f:
+with open('data/words.txt', 'r') as f:
 	WORDS_ARRAY = [word.rstrip() for word in f.readlines()]
 
-with open('user-agents.txt', 'r') as f:
+with open('data/user-agents.txt', 'r') as f:
 	USER_AGENTS = [ua.rstrip() for ua in f.readlines()]
 
-if os.path.exists('proxies.txt'):
-	with open('proxies.txt', 'r') as f:
+AUTO_REMOVE_BAD_PROXIES = USER_CONFIG.get('auto_remove_bad_proxies', False)
+using_proxies_from_file = True # needed for automatically removing bad proxies from the file
+
+if os.path.exists('data/proxies.txt'):
+	with open('data/proxies.txt', 'r') as f:
 		proxies_array = [{'http': "http://" + proxy.rstrip(), 'https': "https://" + proxy.rstrip()} for proxy in f.readlines()]
 else:
 	proxies_array = []
 
 if not proxies_array:
-	print(f"{Fore.YELLOW}Warning: No proxies found, you may continue but this will most likely not achieve anything{Fore.RESET}")
-	print(f"{Fore.YELLOW}Optionally I can try and fetch some proxies for you, or you can add them manually in proxies.txt{Fore.RESET}")
+	print(f"{Fore.YELLOW}Warning: No proxies found, you may continue but this will most likely wont accomplish anything,{Fore.RESET}")
+	print(f"{Fore.YELLOW}optionally I can try and fetch some proxies for you, or you can add them manually in proxies.txt{Fore.RESET}")
 	
 	if input(f"\n{Fore.BLUE}Would you like me to fetch some proxies for you? (y/n): {Fore.RESET}").lower() == 'y':
 		print(f"{Fore.YELLOW}Fetching proxies...{Fore.RESET}")
@@ -59,8 +63,10 @@ if not proxies_array:
 
 		# ask the user if they want to save the proxies
 		if input(f"\n{Fore.BLUE}Would you like to save the proxies to proxies.txt? (y/n): {Fore.RESET}").lower() == 'y':
-			with open('proxies.txt', 'w') as f:
+			with open('data/proxies.txt', 'w') as f:
 				f.write('\n'.join(proxies))
+		else:
+			using_proxies_from_file = False
 		
 		# convert the proxies to the format we need
 		proxies_array = [{'http': "http://" + proxy, 'https': "https://" + proxy} for proxy in proxies]
@@ -70,6 +76,9 @@ if not proxies_array:
 
 print("\n" + Fore.CYAN + "-" * 50 + Fore.RESET)
 print(f"{Fore.YELLOW}Loaded {Fore.GREEN}{len(WORDS_ARRAY):,}{Fore.YELLOW} words, {Fore.GREEN}{len(USER_AGENTS):,}{Fore.YELLOW} user-agents, and {Fore.GREEN}{len(proxies_array):,}{Fore.YELLOW} proxies{Fore.RESET}")
+
+AUTO_REMOVE_BAD_PROXIES = AUTO_REMOVE_BAD_PROXIES and using_proxies_from_file
+
 
 ORIGINAL_PROXY_COUNT = len(proxies_array)
 
@@ -105,7 +114,7 @@ def screwScammers() -> None:
 				sent_requests += 1
 				fails = 0 # reset the fails counter if we successfully send a request
 				
-		except Exception as e: # most likely a network-related error that can be somewhat safely ignored
+		except Exception as e: # most likely a network-related error that can be *somewhat* safely ignored
 			pass
 
 
@@ -113,9 +122,18 @@ def main() -> None:
 	with concurrent.futures.ThreadPoolExecutor(max_workers=USER_CONFIG['thread_count']) as executor:
 		for _ in range(USER_CONFIG['thread_count']):
 			executor.submit(screwScammers)
-		
+
+		last_save = time.time()
+
 		while True:
 			print(f"{Fore.CYAN}Sent requests: {Fore.GREEN}{sent_requests:,}{Fore.CYAN}, Failed requests: {Fore.RED}{failed_requests:,}{Fore.CYAN}, Proxies: {Fore.GREEN}{len(proxies_array):,}{Fore.RESET}/{Fore.RED}{ORIGINAL_PROXY_COUNT:,}{Fore.RESET}", end='\r')
+			
+			if AUTO_REMOVE_BAD_PROXIES and time.time() - last_save >= 0.1:
+				with open('data/proxies.txt', 'w') as f:
+					f.write('\n'.join([f"{proxy['http'].split('//')[1]}" for proxy in proxies_array]))
+				
+				last_save = time.time() 
+			
 			time.sleep(1)
 
 try:

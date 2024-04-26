@@ -3,6 +3,7 @@
     "max_failures": -1,
     "failure_response": "Your IP has been restricted because of too many attempts.",
     "thread_count": 32,
+    "auto_remove_bad_proxies": true,
     "post_keys": [
         "word1", "word2", "word3", "word4", "word5", 
         "word6", "word7", "word8", "word9", "word10",
