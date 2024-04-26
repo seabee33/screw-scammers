@@ -2,7 +2,7 @@
 # Response code 200 means it works :)
 # This is an updated version which still achieves the same thing as in the video
 
-import requests, random, concurrent.futures, time, json, os
+import requests, random, concurrent.futures, time, json, os, ctypes
 from colors import Fore
 
 
@@ -62,7 +62,7 @@ if not proxies_array:
 		print(f"{Fore.GREEN}Fetched {len(proxies):,} proxies, from {good_sources:,} source(s){Fore.RESET}")
 
 		# ask the user if they want to save the proxies
-		if input(f"\n{Fore.BLUE}Would you like to save the proxies to proxies.txt? (y/n): {Fore.RESET}").lower() == 'y':
+		if input(f"\n{Fore.BLUE}Would you like to save the proxies to proxies.txt? (y/n): {Fore.RESET}").startswith() == 'y':
 			with open('data/proxies.txt', 'w') as f:
 				f.write('\n'.join(proxies))
 		else:
@@ -73,6 +73,13 @@ if not proxies_array:
 		
 	elif input(f"\n{Fore.BLUE}Would you like to continue without proxies? (y/n): {Fore.RESET}").lower() != 'y':
 		exit()
+def title(t: str) -> None:
+    if os.name == "nt":
+        ctypes.windll.kernel32.SetConsoleTitleW(t)
+    else:
+        print(f"\033]0;{t}\007", end="", flush=True)
+        
+        
 
 print("\n" + Fore.CYAN + "-" * 50 + Fore.RESET)
 print(f"{Fore.YELLOW}Loaded {Fore.GREEN}{len(WORDS_ARRAY):,}{Fore.YELLOW} words, {Fore.GREEN}{len(USER_AGENTS):,}{Fore.YELLOW} user-agents, and {Fore.GREEN}{len(proxies_array):,}{Fore.YELLOW} proxies{Fore.RESET}")
@@ -91,6 +98,7 @@ def screwScammers() -> None:
 	while True:
 		try:
 			fails = 0
+			title(t=f"Screw Scammers | Sent requests: {sent_requests:,} | Failed requests: {failed_requests:,} | Proxies: {len(proxies_array):,}/{ORIGINAL_PROXY_COUNT:,} | Threads: {USER_CONFIG['thread_count']} | made by The 5 Dollar Wrench")
 
 			random_words = random.sample(WORDS_ARRAY, 24)
 			post_data = {key:value for (key, value) in zip(USER_CONFIG['post_keys'], random_words)}
