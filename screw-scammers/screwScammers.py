@@ -2,11 +2,21 @@
 # Response code 200 means it works :)
 # This is an updated version which still achieves the same thing as in the video
 
-import requests, random, concurrent.futures, time, json, os, ctypes
+import requests
+import random
+import concurrent.futures
+import time
+import json
+import os
+import ctypes
+
 from colors import Fore
 
+# Same as done in the basic file
+requests_session = requests.Session()
 
 missing_files = [file for file in ['data/words.txt', 'user-config.json', 'data/dev-config.json', 'data/user-agents.txt'] if not os.path.exists(file)]
+
 if missing_files:
 	print(f"{Fore.RED}Missing files: {Fore.RESET}{', '.join(missing_files)}")
 	exit()
@@ -45,7 +55,8 @@ if not proxies_array:
 
 		for url in DEV_CONFIG['proxy_sources']:
 			try:
-				response = requests.get(url)
+				response = requests_session.get(url)
+
 				if response.status_code == 200:
 					proxies.extend(response.text.split('\n'))
 					good_sources += 1
@@ -71,21 +82,19 @@ if not proxies_array:
 		# convert the proxies to the format we need
 		proxies_array = [{'http': "http://" + proxy, 'https': "https://" + proxy} for proxy in proxies]
 		
-	elif input(f"\n{Fore.BLUE}Would you like to continue without proxies? (y/n): {Fore.RESET}").lower() != 'y':
+	else:
 		exit()
+
 def title(t: str) -> None:
     if os.name == "nt":
         ctypes.windll.kernel32.SetConsoleTitleW(t)
     else:
         print(f"\033]0;{t}\007", end="", flush=True)
-        
-        
 
 print("\n" + Fore.CYAN + "-" * 50 + Fore.RESET)
 print(f"{Fore.YELLOW}Loaded {Fore.GREEN}{len(WORDS_ARRAY):,}{Fore.YELLOW} words, {Fore.GREEN}{len(USER_AGENTS):,}{Fore.YELLOW} user-agents, and {Fore.GREEN}{len(proxies_array):,}{Fore.YELLOW} proxies{Fore.RESET}")
 
 AUTO_REMOVE_BAD_PROXIES = AUTO_REMOVE_BAD_PROXIES and using_proxies_from_file
-
 
 ORIGINAL_PROXY_COUNT = len(proxies_array)
 
@@ -106,7 +115,7 @@ def screwScammers() -> None:
 			proxy = random.choice(proxies_array) if proxies_array else {}
 
 			try:
-				response = requests.post(USER_CONFIG['url'], data=post_data, proxies=proxy, headers={'User-Agent': random.choice(USER_AGENTS)}, timeout=5)
+				response = requests_session.post(USER_CONFIG['url'], data=post_data, proxies=proxy, headers={'User-Agent': random.choice(USER_AGENTS)}, timeout=5)
 			except requests.exceptions.ProxyError:
 				proxies_array.remove(proxy)
 				continue
@@ -124,7 +133,6 @@ def screwScammers() -> None:
 				
 		except Exception as e: # most likely a network-related error that can be *somewhat* safely ignored
 			pass
-
 
 def main() -> None:
 	with concurrent.futures.ThreadPoolExecutor(max_workers=USER_CONFIG['thread_count']) as executor:
