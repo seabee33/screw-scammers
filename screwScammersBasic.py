@@ -20,14 +20,32 @@ def screwScammers():
 			random_words = random.sample(words_array, 24)
 
 			postData = {
+				'word1': random_words[0],
+				'word2': random_words[1],
+				'word3': random_words[2],
+				'word4': random_words[3],
+				'word5': random_words[4],
+				'word6': random_words[5],
+				'word7': random_words[6],
+				'word8': random_words[7],
+				'word9': random_words[8],
+				'word10': random_words[9],
+				'word11': random_words[10],
+				'word12': random_words[11],
+				'word13': random_words[12],
+				'word14': random_words[13],
+				'word15': random_words[14],
+				'word16': random_words[15],
+				'word17': random_words[16],
+				'word18': random_words[17],
+				'word19': random_words[18],
+				'word20': random_words[19],
+				'word21': random_words[20],
+				'word22': random_words[21],
+				'word23': random_words[22],
+				'word24': random_words[23],
 				'submit': ''
 			}
-
-			for i in range(25):
-				if i > 0:
-					postData[f"word{i}"] = random_words[i - 1]
-				else:
-					postData[f"word{i}"] = random_words[i]
 
 			response = requests_session.post(url, data=postData)
 
